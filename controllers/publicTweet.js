@@ -34,33 +34,6 @@ async function getRemotePublicTweet(tweetId) {
   return mainTweet;
 }
 
-async function getPublicTweet(req, res) {
-  try {
-    let tweetDetails = await publicTweetModel.getPublicTweet(req.params.tweetId);
-
-    if (!tweetDetails) {
-      tweetDetails = await getRemotePublicTweet(req.params.tweetId);
-
-      const tweetDbDetails = Object.assign({
-        tweet_id: tweetDetails.id,
-        tweet_created_at: tweetDetails.created_at
-      },
-        tweetDetails);
-
-      publicTweetModel.savePublicTweet(tweetDbDetails);
-    } else {
-      updatePublicTweet(req.params.tweetId);
-    }
-
-    return res.send(tweetDetails);
-
-  } catch (error) {
-    console.error(error.message);
-  }
-
-  res.sendStatus(404);
-}
-
 function updatePublicTweet(tweetId) {
   getRemotePublicTweet(tweetId)
     .then((tweetDetails) => {
@@ -74,4 +47,63 @@ function updatePublicTweet(tweetId) {
     }).catch((error) => { console.error(error.message); });
 }
 
-module.exports = { getPublicTweet };
+async function getPublicTweet(req, res) {
+  try {
+    let tweetDetails = await publicTweetModel.getPublicTweet(req.params.tweetId);
+
+    if (!tweetDetails) {
+      tweetDetails = await getRemotePublicTweet(req.params.tweetId);
+    } else {
+      updatePublicTweet(req.params.tweetId);
+    }
+
+    return res.send(tweetDetails);
+
+  } catch (error) {
+    console.error(error.message);
+  }
+
+  res.sendStatus(404);
+}
+
+async function getRemoteTweetComments(tweetId) {
+  const { tweets, users } = await publicTweetUtils.getPublicTweet(tweetId);
+  if (!tweets) {
+    throw 'could not retrieve tweet';
+  }
+
+  const comments = Object.keys(tweets).map((currentTweetId) => (
+    tweetFormatToDBFormat(tweets[currentTweetId], users)
+  ));
+
+  new Promise(() => {
+    comments.forEach((comment) => {
+      publicTweetModel.savePublicTweet(comment);
+    });
+  }).catch((error) => { console.error(`failed to save tweet comments of tweet <${tweetId}> with error <${error.message}>`) });
+
+  return comments; 
+}
+
+async function getTweetComments(req, res) {
+  try {
+    let comments = await publicTweetModel.getTweetComments(req.params.tweetId);
+
+    if (comments.length === 0) {
+      comments = await getRemoteTweetComments(req.params.tweetId);
+
+      comments = comments.filter((comment) => (comment.reply_to_tweet_id === req.params.tweetId));
+    } else {
+      updatePublicTweet(req.params.tweetId);
+    }
+
+    return res.send(comments);
+
+  } catch (error) {
+    console.error(error.message);
+  }
+
+  res.sendStatus(404);
+}
+
+module.exports = { getPublicTweet, getTweetComments };

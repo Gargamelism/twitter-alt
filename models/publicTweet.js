@@ -4,8 +4,8 @@ const TABLE_NAME = 'public_tweet';
 const COLUMNS = ['id', 'tweet_id', 'user_id', 'user_name', 'reply_to_tweet_id', 'tweet_created_at', 'full_text', 'retweet_count', 'favorite_count', 'reply_count', 'quote_count', 'created_at', 'updated_at'];
 const UPDATEABLE_COLUMNS = ['tweet_id', 'user_id', 'user_name', 'reply_to_tweet_id', 'tweet_created_at', 'full_text', 'retweet_count', 'favorite_count', 'reply_count', 'quote_count'];
 
-async function getPublicTweet(postId) {
-  const dbResult = await db.pool.query(`SELECT ${UPDATEABLE_COLUMNS.join(',')} FROM ${TABLE_NAME} WHERE tweet_id = $1::text`, [postId]);
+async function getPublicTweet(tweetId) {
+  const dbResult = await db.pool.query(`SELECT ${UPDATEABLE_COLUMNS.join(',')} FROM ${TABLE_NAME} WHERE tweet_id = $1::text`, [tweetId]);
   return dbResult.rows[0];
 }
 
@@ -38,4 +38,9 @@ function updatePublicTweet(publicPostParams) {
   db.pool.query(query, values);
 }
 
-module.exports = { getPublicTweet, savePublicTweet, updatePublicTweet };
+async function getTweetComments(tweetId) {
+  const dbResult = await db.pool.query(`SELECT ${UPDATEABLE_COLUMNS.join(',')} FROM ${TABLE_NAME} WHERE reply_to_tweet_id = $1::text`, [tweetId]);
+  return dbResult.rows;
+}
+
+module.exports = { getPublicTweet, savePublicTweet, updatePublicTweet, getTweetComments };
