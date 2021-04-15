@@ -5,7 +5,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var publicPostRouter = require('./routes/publicPost');
+var publicTweetsRouter = require('./routes/publicTweet');
 
 var app = express();
 
@@ -15,6 +15,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/public-post/', publicPostRouter);
+app.use('/public-tweets/', publicTweetsRouter);
 
 module.exports = app;

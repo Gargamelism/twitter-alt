@@ -1,14 +1,13 @@
 const axios = require('axios');
 const network = require('./network');
 
-function getPublicPost(postID) {  
-  return axios.get(`https://twitter.com/i/api/2/timeline/conversation/${postID}.json`, {
+function getPublicTweet(tweetId) {  
+  return axios.get(`https://twitter.com/i/api/2/timeline/conversation/${tweetId}.json`, {
     responseType: 'json',
     headers: {
       authorization: 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
       'user-agent': network.getUserAgent(),
-      'x-csrf-token': 'd59b1c51879d189fbe3b6f9529fe66ee',
-      'x-guest-token': '1382020432832954368',
+      'x-guest-token': '1382735505318678539',
       'x-twitter-active-user': 'yes',
       Accept: '*/*',
       'Accept-Language': 'en- US, en; q = 0.5',
@@ -46,9 +45,9 @@ function getPublicPost(postID) {
     }
   })
     .then((response) => {
-      return response.data.globalObjects.tweets[postID];
+      return response.data.globalObjects;
     })
-    .catch((error) => { console.error(error.message); })
+    .catch((error) => { console.error(`request failed with error <${error.message}>`); })
 }
 
-module.exports = { getPublicPost };
+module.exports = { getPublicTweet };
