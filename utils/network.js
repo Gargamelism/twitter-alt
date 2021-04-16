@@ -1,3 +1,4 @@
+const axios = require('axios');
 
 function getUserAgent() {
   const userAgents = [
@@ -17,4 +18,24 @@ function getUserAgent() {
   return userAgents[Math.floor(Math.random() * userAgents.length)];
 }
 
-module.exports = { getUserAgent };
+function parseGuestToken(data) {
+  return data.match(/gt=(\d+)/g)[0].split('=')[1];
+}
+
+let guestToken = '';
+async function getGuestToken() {
+  if(guestToken) {
+    return guestToken;
+  }
+
+  try {
+    const response = await axios.get('https://www.twitter.com');
+    guestToken = parseGuestToken(response.data);
+  } catch {
+    console.error('could not retrieve guest token');
+  }
+
+  return guestToken;
+}
+
+module.exports = { getUserAgent, getGuestToken };

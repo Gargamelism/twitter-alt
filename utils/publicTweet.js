@@ -1,13 +1,13 @@
 const axios = require('axios');
 const network = require('./network');
 
-function getPublicTweet(tweetId) {  
+async function getPublicTweet(tweetId) {  
   return axios.get(`https://twitter.com/i/api/2/timeline/conversation/${tweetId}.json`, {
     responseType: 'json',
     headers: {
       authorization: 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
       'user-agent': network.getUserAgent(),
-      'x-guest-token': '1382735505318678539',
+      'x-guest-token': await network.getGuestToken(),
       'x-twitter-active-user': 'yes',
       Accept: '*/*',
       'Accept-Language': 'en- US, en; q = 0.5',
